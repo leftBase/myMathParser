@@ -30,23 +30,44 @@ function update() {
 source.addEventListener("input", update);
 copyButton.addEventListener("click", async () => {
 	if (!currentLatex || !preview.innerHTML) return;
-	const renderedHtml = copyWithInlineStyles(preview);
-	const html = `<div>${renderedHtml}</div>`;
 	const text = `$$${currentLatex}$$`;
-	if (navigator.clipboard?.write && window.ClipboardItem) {
-		await navigator.clipboard.write([new ClipboardItem({
-			"text/html": new Blob([html], { type: "text/html" }),
-			"text/plain": new Blob([text], { type: "text/plain" }),
-			"text/latex": new Blob([currentLatex], { type: "text/latex" })
-		})]);
-	} else {
+	try {
+		const image = await createEquationPng(preview);
+		if (navigator.clipboard?.write && window.ClipboardItem && image) {
+			await navigator.clipboard.write([new ClipboardItem({
+				"image/png": image,
+				"text/plain": new Blob([text], { type: "text/plain" })
+			})]);
+		} else {
+			await navigator.clipboard.writeText(text);
+		}
+	} catch (error) {
 		await navigator.clipboard.writeText(text);
 	}
 	copyButton.textContent = "복사됨";
 	setTimeout(() => { copyButton.textContent = "미리보기 전체 복사"; }, 900);
 });
 
-function copyWithInlineStyles(element) {
+async function createEquationPng(element) {
+	const equation = element.querySelector(".katex") ?? element;
+	const bounds = equation.getBoundingClientRect();
+	const padding = 24;
+	const width = Math.max(1, Math.ceil(bounds.width + padding * 2));
+	const height = Math.max(1, Math.ceil(bounds.height + padding * 2));
+	const clone = copyWithInlineStyles(equation, true);
+	clone.style.cssText += `;display:inline-block;margin:0;color:#111;`;
+	const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xhtml="http://www.w3.org/1999/xhtml" width="${width}" height="${height}"><foreignObject x="0" y="0" width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml" style="box-sizing:border-box;width:100%;height:100%;padding:${padding}px;background:#fff;color:#111;">${clone.outerHTML}</div></foreignObject></svg>`;
+	const image = new Image();
+	image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+	await image.decode();
+	const canvas = document.createElement("canvas");
+	canvas.width = width;
+	canvas.height = height;
+	canvas.getContext("2d").drawImage(image, 0, 0);
+	return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+}
+
+function copyWithInlineStyles(element, forceBlack) {
 	const clone = element.cloneNode(true);
 	const originalElements = [element, ...element.querySelectorAll("*")];
 	const clonedElements = [clone, ...clone.querySelectorAll("*")];
@@ -61,6 +82,7 @@ function copyWithInlineStyles(element) {
 		clonedElements[index].style.cssText = styles
 			.map((property) => `${property}:${computed.getPropertyValue(property)}`)
 			.join(";");
+		if (forceBlack) clonedElements[index].style.color = "#111";
 	}
 	return clone.outerHTML;
 }
