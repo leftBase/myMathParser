@@ -38,6 +38,9 @@ function renderBinary(node) {
 function renderIntegral(node) {
 	const body = toLatex(unwrapGroup(node.body));
 	const differential = `d${toLatex({ type: "identifier", name: node.differential })}`;
+	if (node.kind === "oint") return `\\oint ${body}\\,${differential}`;
+	if (node.kind === "ointc") return `\\oint_C ${body}\\,${differential}`;
+	if (node.kind === "oints") return `\\oint_S ${body}\\,${differential}`;
 	if (node.kind === "intc") return `\\int_C ${body}\\,${differential}`;
 	if (node.kind === "ints") return `\\iint_S ${body}\\,${differential}`;
 	return `\\int ${body}\\,${differential}`;
@@ -50,6 +53,10 @@ function renderMatrix(node) {
 
 function renderOperator(node) {
 	const argument = toLatex(node.argument);
+	if (node.operator === "vec") return `\\vec{\\mathbf{${argument}}}`;
+	if (node.operator === "bar") return `\\overline{${argument}}`;
+	if (node.operator === "hat") return `\\hat{${argument}}`;
+	if (node.operator === "tild") return `\\tilde{${argument}}`;
 	if (node.operator === "del") return `\\nabla ${argument}`;
 	if (node.operator === "grad") return `\\nabla ${argument}`;
 	if (node.operator === "curl") return `\\nabla \\times ${argument}`;

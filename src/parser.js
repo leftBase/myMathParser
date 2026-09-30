@@ -108,7 +108,7 @@ class Parser {
 
 	parseExpression() {
 		let expression = this.parseTerm();
-		while (this.is("+") || this.is("-")) {
+		while (this.is("+") || this.is("-") || this.is("=")) {
 			const operator = this.take().value;
 			expression = binaryNode(operator, expression, this.parseTerm());
 		}
@@ -160,9 +160,16 @@ class Parser {
 
 		const name = this.take().value;
 		if (name === "mporn*") return rawNode("m_p^* \\text{ or } m_n^*");
-		if (["int", "intc", "ints"].includes(name)) return this.parseIntegral(name);
+		if (["int", "intc", "ints", "oint", "ointc", "oints"].includes(name)) return this.parseIntegral(name);
 		if (["grad", "curl", "div", "laf"].includes(name)) {
 			return operatorNode(name, this.parsePrimary());
+		}
+		if (["vec", "bar", "tild", "hat"].includes(name)) {
+			return operatorNode(name, this.parsePrimary());
+		}
+		if (name === "r" && this.is("hat")) {
+			this.take();
+			return operatorNode("hat", identifierNode(name));
 		}
 		if (name === "nabla") return operatorNode("del", this.canStartPrimary() ? this.parsePrimary() : null);
 		if (name === "del") {
@@ -178,6 +185,9 @@ class Parser {
 		}
 		const compactFunction = name.match(/^(sin|cos|tan|log|ln|exp)([A-Za-z]\d*)$/);
 		if (compactFunction) return functionNode(compactFunction[1], identifierNode(compactFunction[2]));
+		const compactModifier = name.match(/^(vec|bar|tild)([A-Za-z]\d*)$/);
+		if (compactModifier) return operatorNode(compactModifier[1], identifierNode(compactModifier[2]));
+		if (name === "rhat") return operatorNode("hat", identifierNode("r"));
 		if (aliases.has(name)) return identifierNode(name);
 		if (name === "pix") return binaryNode("*", identifierNode("pi"), identifierNode("x"));
 		if (name.startsWith("o") && this.is("/") && this.tokens[this.position + 1]?.type === "identifier" && this.tokens[this.position + 1].value.startsWith("o")) {
