@@ -33,7 +33,7 @@ latexCopyButton.addEventListener("click", async () => {
 	if (!currentLatex) return;
 	await navigator.clipboard.writeText(currentLatex);
 	latexCopyButton.textContent = "복사됨";
-	setTimeout(() => { latexCopyButton.textContent = "인라인 LaTeX 복사"; }, 900);
+	setTimeout(() => { latexCopyButton.textContent = "인라인 수식용 LaTeX 복사"; }, 900);
 });
 
 copyButton.addEventListener("click", async () => {
@@ -61,6 +61,7 @@ async function createEquationPng(element) {
 	const padding = 24;
 	const width = Math.max(1, Math.ceil(bounds.width + padding * 2));
 	const height = Math.max(1, Math.ceil(bounds.height + padding * 2));
+	const scale = 3;
 	const clone = copyWithInlineStyles(equation, true);
 	clone.style.cssText += `;display:inline-block;margin:0;color:#111;`;
 	const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xhtml="http://www.w3.org/1999/xhtml" width="${width}" height="${height}"><foreignObject x="0" y="0" width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml" style="box-sizing:border-box;width:100%;height:100%;padding:${padding}px;background:#fff;color:#111;">${clone.outerHTML}</div></foreignObject></svg>`;
@@ -68,9 +69,12 @@ async function createEquationPng(element) {
 	image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 	await image.decode();
 	const canvas = document.createElement("canvas");
-	canvas.width = width;
-	canvas.height = height;
-	canvas.getContext("2d").drawImage(image, 0, 0);
+	canvas.width = width * scale;
+	canvas.height = height * scale;
+	const context = canvas.getContext("2d");
+	context.imageSmoothingEnabled = true;
+	context.imageSmoothingQuality = "high";
+	context.drawImage(image, 0, 0, canvas.width, canvas.height);
 	return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
 }
 
