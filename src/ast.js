@@ -10,6 +10,10 @@ export function binaryNode(operator, left, right) {
 	return { type: "binary", operator, left, right };
 }
 
+export function unaryNode(operator, argument) {
+	return { type: "unary", operator, argument };
+}
+
 export function functionNode(name, argument) {
 	return { type: "function", name, argument };
 }

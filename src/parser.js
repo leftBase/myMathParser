@@ -9,7 +9,8 @@ import {
 	numberNode,
 	operatorNode,
 	rawNode,
-	typedIntegralNode
+	typedIntegralNode,
+	unaryNode
 } from "./ast.js";
 import { tokenize } from "./tokenizer.js";
 
@@ -116,15 +117,15 @@ class Parser {
 	}
 
 	parseTerm() {
-		let expression = this.parsePower();
+		let expression = this.parseUnary();
 		while (true) {
 			if (this.is("*") || this.is("/")) {
 				const operator = this.take().value;
-				expression = binaryNode(operator, expression, this.parsePower());
+				expression = binaryNode(operator, expression, this.parseUnary());
 				continue;
 			}
 			if (this.canStartPrimary()) {
-				expression = binaryNode("*", expression, this.parsePower());
+				expression = binaryNode("*", expression, this.parseUnary());
 				continue;
 			}
 			return expression;
@@ -135,9 +136,17 @@ class Parser {
 		const base = this.parsePrimary();
 		if (this.is("^")) {
 			this.take();
-			return binaryNode("^", base, this.parsePower());
+			return binaryNode("^", base, this.parseUnary());
 		}
 		return base;
+	}
+
+	parseUnary() {
+		if (this.is("+") || this.is("-")) {
+			const operator = this.take().value;
+			return unaryNode(operator, this.parseUnary());
+		}
+		return this.parsePower();
 	}
 
 	parsePrimary() {
@@ -164,6 +173,8 @@ class Parser {
 		if (["grad", "curl", "div", "laf"].includes(name)) {
 			return operatorNode(name, this.parsePrimary());
 		}
+		const compactOperator = name.match(/^(grad|curl|div|laf)([A-Za-z]\d*)$/);
+		if (compactOperator) return operatorNode(compactOperator[1], identifierNode(compactOperator[2]));
 		if (["vec", "bar", "tild", "hat"].includes(name)) {
 			return operatorNode(name, this.parsePrimary());
 		}

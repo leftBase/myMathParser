@@ -17,6 +17,7 @@ export function toLatex(node) {
 		case "raw": return node.latex;
 		case "group": return `\\left(${toLatex(node.expression)}\\right)`;
 		case "function": return `\\${node.name}{${toLatex(node.argument)}}`;
+		case "unary": return `${node.operator}${toLatex(node.argument)}`;
 		case "binary": return renderBinary(node);
 		case "derivative": return `\\frac{\\partial ${toLatex(node.numerator)}}{\\partial ${toLatex(node.denominator)}}`;
 		case "integral": return renderIntegral(node);
