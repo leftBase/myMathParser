@@ -1,0 +1,8 @@
+{
+  "name": "my-math-parser",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/parser.test.js"
+  }
+}

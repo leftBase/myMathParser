@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>My Math Parser</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.css">
+	<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+	<main class="workspace">
+		<header class="topbar">
+			<div>
+				<p class="eyebrow">PERSONAL NOTATION LAB</p>
+				<h1>My Math Parser</h1>
+			</div>
+			<button id="copy-latex" type="button">LaTeX 복사</button>
+		</header>
+
+		<section class="editor-grid" aria-label="수식 편집기">
+			<label class="panel input-panel">
+				<span class="panel-title">입력</span>
+				<textarea id="source" spellcheck="false" autofocus placeholder="예: int [ sin [ x ] + mu0 ] dx"></textarea>
+				<span class="hint">sin [x] · int [x^2] dx · oy / ox · mporn*</span>
+			</label>
+
+			<section class="panel preview-panel">
+				<span class="panel-title">미리보기</span>
+				<div id="preview" class="preview" aria-live="polite"></div>
+				<p id="error-output" class="error" role="alert"></p>
+			</section>
+		</section>
+
+		<section class="latex-panel">
+			<span class="panel-title">생성된 LaTeX</span>
+			<code id="latex-output"></code>
+		</section>
+	</main>
+	<script src="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.js"></script>
+	<script type="module" src="../src/input.js"></script>
+</body>
+</html>
