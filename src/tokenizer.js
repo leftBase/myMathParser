@@ -33,8 +33,14 @@ export function tokenize(source) {
 			continue;
 		}
 
-		if ("+-*/^=".includes(character)) {
+		if ("+-*/^=_".includes(character)) {
 			tokens.push({ type: "operator", value: character });
+			index += 1;
+			continue;
+		}
+
+		if (character === ",") {
+			tokens.push({ type: "comma", value: character });
 			index += 1;
 			continue;
 		}

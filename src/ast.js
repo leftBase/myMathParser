@@ -14,6 +14,14 @@ export function unaryNode(operator, argument) {
 	return { type: "unary", operator, argument };
 }
 
+export function subscriptNode(base, index) {
+	return { type: "subscript", base, index };
+}
+
+export function callNode(name, argumentsList) {
+	return { type: "call", name, arguments: argumentsList };
+}
+
 export function functionNode(name, argument) {
 	return { type: "function", name, argument };
 }

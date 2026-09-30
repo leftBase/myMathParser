@@ -18,6 +18,8 @@ export function toLatex(node) {
 		case "group": return `\\left(${toLatex(node.expression)}\\right)`;
 		case "function": return `\\${node.name}{${toLatex(node.argument)}}`;
 		case "unary": return `${node.operator}${toLatex(node.argument)}`;
+		case "subscript": return `${toLatex(node.base)}_{${toLatex(node.index)}}`;
+		case "call": return `${node.name}\\left(${node.arguments.map(toLatex).join(", \\; ")}\\right)`;
 		case "binary": return renderBinary(node);
 		case "derivative": return `\\frac{\\partial ${toLatex(node.numerator)}}{\\partial ${toLatex(node.denominator)}}`;
 		case "integral": return renderIntegral(node);

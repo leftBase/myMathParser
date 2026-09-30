@@ -1,5 +1,6 @@
 import {
 	binaryNode,
+	callNode,
 	derivativeNode,
 	functionNode,
 	groupNode,
@@ -9,6 +10,7 @@ import {
 	numberNode,
 	operatorNode,
 	rawNode,
+	subscriptNode,
 	typedIntegralNode,
 	unaryNode
 } from "./ast.js";
@@ -169,6 +171,10 @@ class Parser {
 
 		const name = this.take().value;
 		if (name === "mporn*") return rawNode("m_p^* \\text{ or } m_n^*");
+		if (this.is("_")) {
+			this.take();
+			return subscriptNode(identifierNode(name), this.parsePrimary());
+		}
 		if (["int", "intc", "ints", "oint", "ointc", "oints"].includes(name)) return this.parseIntegral(name);
 		if (["grad", "curl", "div", "laf"].includes(name)) {
 			return operatorNode(name, this.parsePrimary());
@@ -190,6 +196,7 @@ class Parser {
 			}
 			return operatorNode("del", this.canStartPrimary() ? this.parsePrimary() : null);
 		}
+		if (this.is("[") && !functions.has(name)) return this.parseCall(name);
 		if (name === "round") return this.parseRoundDerivative();
 		if (functions.has(name)) {
 			return functionNode(name, this.parsePrimary());
@@ -210,6 +217,20 @@ class Parser {
 			return binaryNode("*", identifierNode(name[0]), identifierNode(name[1]));
 		}
 		return identifierNode(name);
+	}
+
+	parseCall(name) {
+		this.expect("[");
+		const argumentsList = [];
+		if (!this.is("]")) {
+			argumentsList.push(this.parseExpression());
+			while (this.is(",")) {
+				this.take();
+				argumentsList.push(this.parseExpression());
+			}
+		}
+		this.expect("]");
+		return callNode(name, argumentsList);
 	}
 
 	parseRoundDerivative() {
