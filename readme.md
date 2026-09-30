@@ -4,16 +4,7 @@
 
 ## 실행
 
-프로젝트 루트에서 다음 명령을 실행합니다.
-
-```powershell
-python -m http.server 4173
-```
-
-브라우저에서 [http://localhost:4173/renderer/index.html](http://localhost:4173/renderer/index.html)을 엽니다.
-
-파일을 직접 열지 않고 정적 서버를 사용하는 이유는 브라우저의 ES module 보안 정책 때문입니다.
-
+https://leftbase.github.io/myMathParser/renderer/index.html
 ## 개발 테스트
 
 ```powershell
