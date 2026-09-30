@@ -35,8 +35,7 @@ copyButton.addEventListener("click", async () => {
 		const image = await createEquationPng(preview);
 		if (navigator.clipboard?.write && window.ClipboardItem && image) {
 			await navigator.clipboard.write([new ClipboardItem({
-				"image/png": image,
-				"text/plain": new Blob([text], { type: "text/plain" })
+				"image/png": image
 			})]);
 		} else {
 			await navigator.clipboard.writeText(text);
@@ -45,7 +44,7 @@ copyButton.addEventListener("click", async () => {
 		await navigator.clipboard.writeText(text);
 	}
 	copyButton.textContent = "복사됨";
-	setTimeout(() => { copyButton.textContent = "미리보기 전체 복사"; }, 900);
+	setTimeout(() => { copyButton.textContent = "미리보기 이미지 복사"; }, 900);
 });
 
 async function createEquationPng(element) {
@@ -84,7 +83,7 @@ function copyWithInlineStyles(element, forceBlack) {
 			.join(";");
 		if (forceBlack) clonedElements[index].style.color = "#111";
 	}
-	return clone.outerHTML;
+	return clone;
 }
 
 update();
