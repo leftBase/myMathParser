@@ -19,7 +19,15 @@ export function groupNode(expression) {
 }
 
 export function integralNode(body, differential) {
-	return { type: "integral", body, differential };
+	return { type: "integral", body, differential, kind: "ordinary" };
+}
+
+export function typedIntegralNode(kind, body, differential) {
+	return { type: "integral", kind, body, differential };
+}
+
+export function matrixNode(rows) {
+	return { type: "matrix", rows };
 }
 
 export function derivativeNode(numerator, denominator) {

@@ -19,8 +19,9 @@ export function toLatex(node) {
 		case "function": return `\\${node.name}{${toLatex(node.argument)}}`;
 		case "binary": return renderBinary(node);
 		case "derivative": return `\\frac{\\partial ${toLatex(node.numerator)}}{\\partial ${toLatex(node.denominator)}}`;
-		case "integral": return `\\int ${toLatex(unwrapGroup(node.body))}\\,d${toLatex({ type: "identifier", name: node.differential })}`;
+		case "integral": return renderIntegral(node);
 		case "operator": return renderOperator(node);
+		case "matrix": return renderMatrix(node);
 		default: throw new Error(`알 수 없는 AST 노드: ${node.type}`);
 	}
 }
@@ -32,6 +33,19 @@ function renderBinary(node) {
 	if (node.operator === "^") return `{${left}}^{${right}}`;
 	if (node.operator === "*") return `${left}\\,${right}`;
 	return `${left} ${node.operator} ${right}`;
+}
+
+function renderIntegral(node) {
+	const body = toLatex(unwrapGroup(node.body));
+	const differential = `d${toLatex({ type: "identifier", name: node.differential })}`;
+	if (node.kind === "intc") return `\\int_C ${body}\\,${differential}`;
+	if (node.kind === "ints") return `\\iint_S ${body}\\,${differential}`;
+	return `\\int ${body}\\,${differential}`;
+}
+
+function renderMatrix(node) {
+	const rows = node.rows.map((row) => row.map((cell) => toLatex(cell)).join(" & "));
+	return `\\begin{bmatrix}${rows.join(" \\\\ ")}\\end{bmatrix}`;
 }
 
 function renderOperator(node) {

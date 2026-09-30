@@ -37,6 +37,10 @@ npm test
 sin [ x + 1 ]
 cos [ x ]
 int [ x^2 ] dx
+int [sint] dt
+int t dt
+intc [f] ds
+ints [f] dS
 3x
 3 x
 xy
@@ -51,6 +55,9 @@ grad x
 curl x
 div x
 laf x
+nabla x
+mat [a b; c d]
+mat[a b; c d; 34 oy/ox]
 del dot x
 del cross x
 mporn*
@@ -68,6 +75,10 @@ grad x    -> \nabla x
 curl x    -> \nabla \times x
 div x     -> \nabla \cdot x
 laf x     -> \nabla^2 x
+intc      -> \int_C f\,ds
+ints      -> \iint_S f\,dS
+nabla x   -> \nabla x
+행렬      -> mat [a b; c d]
 mporn*    -> m_p^* \text{ or } m_n^*
 ```
 
@@ -153,3 +164,9 @@ m_p ^* or m_n ^*로 번역되는 속기용 특수 규칙이 될 수 있다
 nabla기호는 del을 번역하여 렌더되어야한다
 grad x, curl x, del dot x, del cross x, laf(라플라스) x, div x 가 번역 되어야한다.
 추가로 시간이 남으면 델 내적 x 등도 번역하게 한다. 토큰화 했을때 델, 내적, 주위에 다른 한글이 있으면 파싱하지 않는 방식으로 구현할 수 있을 것 같다
+
+행렬은 [a b/ c d/ 34 o/ox]가 
+a b
+c d
+34 round/roundx로
+잘 번역되어야한다

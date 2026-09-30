@@ -5,6 +5,10 @@ import { toLatex } from "../src/render.js";
 const cases = [
   ["sin [ x + 1 ]", "\\sin{\\left(x + 1\\right)}"],
   ["int [ x^2 ] dx", "\\int {x}^{2}\\,dx"],
+  ["int [sint] dt", "\\int \\sin{t}\\,dt"],
+  ["int t dt", "\\int t\\,dt"],
+  ["intc [f] ds", "\\int_C f\\,ds"],
+  ["ints [f] dS", "\\iint_S f\\,dS"],
   ["3x", "3\\,x"],
   ["xy", "x\\,y"],
   ["mu0", "\\mu_0"],
@@ -18,6 +22,11 @@ const cases = [
   ["curl x", "\\nabla \\times x"],
   ["div x", "\\nabla \\cdot x"],
   ["laf x", "\\nabla^2 x"],
+  ["nabla x", "\\nabla x"],
+  ["del", "\\nabla "],
+  ["mat [a b; c d]", "\\begin{bmatrix}a & b \\\\ c & d\\end{bmatrix}"],
+  ["mat[a b;c d;34 oy/ox]", "\\begin{bmatrix}a & b \\\\ c & d \\\\ 34 & \\frac{\\partial y}{\\partial x}\\end{bmatrix}"],
+  ["[a b; c d]", "\\begin{bmatrix}a & b \\\\ c & d\\end{bmatrix}"],
   ["mporn*", "m_p^* \\text{ or } m_n^*"]
 ];
 

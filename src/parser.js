@@ -5,9 +5,11 @@ import {
 	groupNode,
 	identifierNode,
 	integralNode,
+	matrixNode,
 	numberNode,
 	operatorNode,
-	rawNode
+	rawNode,
+	typedIntegralNode
 } from "./ast.js";
 import { tokenize } from "./tokenizer.js";
 
@@ -15,6 +17,9 @@ const functions = new Set(["sin", "cos", "tan", "log", "ln", "exp", "sqrt"]);
 const aliases = new Set(["pi", "mu0", "lo", "x0", "theta", "alpha", "beta", "gamma"]);
 
 export function parse(source) {
+	const matrix = parseMatrix(source);
+	if (matrix) return matrix;
+
 	const tokens = tokenize(source);
 	if (tokens.length === 0) return null;
 
@@ -28,6 +33,31 @@ export function parse(source) {
 	const expression = parser.parseExpression();
 	parser.expectEnd();
 	return expression;
+}
+
+function parseMatrix(source) {
+	const trimmed = source.trim();
+	const explicitMatrix = /^mat\s*/i.test(trimmed);
+	const bracketSource = explicitMatrix ? trimmed.replace(/^mat\s*/i, "") : trimmed;
+	if (!bracketSource.startsWith("[") || !bracketSource.endsWith("]")) return null;
+
+	const inner = bracketSource.slice(1, -1);
+	if (!explicitMatrix && !inner.includes(";")) return null;
+	const rows = [];
+	let start = 0;
+	let depth = 0;
+	for (let index = 0; index < inner.length; index += 1) {
+		if (inner[index] === "[") depth += 1;
+		if (inner[index] === "]") depth -= 1;
+		if (inner[index] === ";" && depth === 0) {
+			rows.push(inner.slice(start, index).trim());
+			start = index + 1;
+		}
+	}
+	if (rows.length === 0 && !explicitMatrix) return null;
+	rows.push(inner.slice(start).trim());
+	if (rows.some((row) => row.length === 0)) throw new Error("행렬의 행이 비어 있습니다.");
+	return matrixNode(rows.map((row) => row.split(/\s+/).filter(Boolean).map((cell) => parse(cell))));
 }
 
 class Parser {
@@ -130,36 +160,51 @@ class Parser {
 
 		const name = this.take().value;
 		if (name === "mporn*") return rawNode("m_p^* \\text{ or } m_n^*");
-		if (name === "int") return this.parseIntegral();
+		if (["int", "intc", "ints"].includes(name)) return this.parseIntegral(name);
 		if (["grad", "curl", "div", "laf"].includes(name)) {
 			return operatorNode(name, this.parsePrimary());
 		}
+		if (name === "nabla") return operatorNode("del", this.canStartPrimary() ? this.parsePrimary() : null);
 		if (name === "del") {
 			if (this.is("dot") || this.is("cross")) {
 				const operation = this.take().value;
 				return operatorNode(`del-${operation}`, this.parsePrimary());
 			}
-			return operatorNode("del", this.parsePrimary());
+			return operatorNode("del", this.canStartPrimary() ? this.parsePrimary() : null);
 		}
+		if (name === "round") return this.parseRoundDerivative();
 		if (functions.has(name)) {
-			const argument = this.is("[") || this.is("(") ? this.parsePrimary() : this.parsePrimary();
-			return functionNode(name, argument);
+			return functionNode(name, this.parsePrimary());
 		}
+		const compactFunction = name.match(/^(sin|cos|tan|log|ln|exp)([A-Za-z]\d*)$/);
+		if (compactFunction) return functionNode(compactFunction[1], identifierNode(compactFunction[2]));
 		if (aliases.has(name)) return identifierNode(name);
 		if (name === "pix") return binaryNode("*", identifierNode("pi"), identifierNode("x"));
+		if (name.startsWith("o") && this.is("/") && this.tokens[this.position + 1]?.type === "identifier" && this.tokens[this.position + 1].value.startsWith("o")) {
+			this.take();
+			const denominator = this.take().value.slice(1);
+			return derivativeNode(identifierNode(name.slice(1)), identifierNode(denominator));
+		}
 		if (/^[a-z]{2}$/.test(name)) {
 			return binaryNode("*", identifierNode(name[0]), identifierNode(name[1]));
 		}
 		return identifierNode(name);
 	}
 
-	parseIntegral() {
+	parseRoundDerivative() {
+		const numerator = this.parsePrimary();
+		this.expect("/");
+		this.expect("round");
+		return derivativeNode(numerator, this.parsePrimary());
+	}
+
+	parseIntegral(kind) {
 		const body = this.parsePrimary();
 		let differential = "x";
 		if (this.current()?.type === "identifier" && this.current().value.startsWith("d")) {
 			differential = this.take().value.slice(1) || "x";
 		}
-		return integralNode(body, differential);
+		return kind === "int" ? integralNode(body, differential) : typedIntegralNode(kind, body, differential);
 	}
 
 	canStartPrimary() {
