@@ -24,7 +24,9 @@ body {
 .eyebrow, .panel-title, .hint, code { font-family: "DM Mono", monospace; }
 .eyebrow { margin: 0 0 8px; color: var(--accent); font-size: 11px; letter-spacing: 0.12em; }
 h1 { margin: 0; font-size: clamp(2rem, 5vw, 4.5rem); line-height: .95; letter-spacing: -.04em; }
+.copy-actions { display: flex; flex-wrap: wrap; justify-content: end; gap: 8px; }
 button { border: 1px solid var(--accent); background: var(--accent); color: #17200d; padding: 11px 16px; font: 600 13px "DM Mono", monospace; cursor: pointer; }
+button + button { border-color: var(--line); background: transparent; color: var(--ink); }
 button:hover { background: #edfcae; }
 .editor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .panel, .latex-panel { border: 1px solid var(--line); background: linear-gradient(135deg, rgba(22, 39, 34, .92), rgba(13, 22, 20, .92)); }

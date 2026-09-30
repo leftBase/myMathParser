@@ -5,6 +5,7 @@ const source = document.querySelector("#source");
 const preview = document.querySelector("#preview");
 const errorOutput = document.querySelector("#error-output");
 const copyButton = document.querySelector("#copy-preview");
+const latexCopyButton = document.querySelector("#copy-latex");
 let currentLatex = "";
 
 function update() {
@@ -28,6 +29,13 @@ function update() {
 }
 
 source.addEventListener("input", update);
+latexCopyButton.addEventListener("click", async () => {
+	if (!currentLatex) return;
+	await navigator.clipboard.writeText(currentLatex);
+	latexCopyButton.textContent = "복사됨";
+	setTimeout(() => { latexCopyButton.textContent = "인라인 LaTeX 복사"; }, 900);
+});
+
 copyButton.addEventListener("click", async () => {
 	if (!currentLatex || !preview.innerHTML) return;
 	const text = `$$${currentLatex}$$`;
